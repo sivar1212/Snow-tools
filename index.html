@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ckb" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#06111f">
+<title>❄ Snow Tools</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#06111f;color:#e8f7ff;font-family:Tahoma,Arial,sans-serif}
+header{text-align:center;padding:35px 15px;background:linear-gradient(140deg,#102e49,#06111f);border-bottom:1px solid #245477}
+h1{font-size:38px;color:#7de0ff;text-shadow:0 0 22px #168acb}
+header p{color:#b8d5e7}
+main{max-width:950px;margin:25px auto;padding:12px}
+.search,input,textarea{width:100%;padding:13px;background:#071a2a;border:1px solid #28516d;border-radius:11px;color:white;font:inherit}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:15px;margin-top:20px}
+.card{background:linear-gradient(145deg,#10263a,#091725);border:1px solid #244963;border-radius:16px;padding:18px}
+h2{color:#7de0ff;font-size:20px}
+button{background:#1689c8;color:white;border:0;border-radius:10px;padding:11px 14px;margin-top:10px;font:inherit;cursor:pointer}
+button:hover{background:#36b6ef}
+.result{margin-top:12px;padding:10px;background:#04101c;border-radius:9px;overflow-wrap:anywhere;white-space:pre-wrap;color:#8ee5ff}
+footer{text-align:center;padding:30px;color:#9bbdd2}
+#snow{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:-1}
+</style>
+</head>
+<body>
+<canvas id="snow"></canvas>
+<header>
+<div style="font-size:45px">❄️</div>
+<h1>Snow Tools</h1>
+<p>ئامرازە زیرەک و خۆڕاییەکانت لە یەک شوێن</p>
+</header>
+<main>
+<input class="search" id="search" placeholder="گەڕان بۆ ئامراز..." oninput="filterTools()">
+<div class="grid" id="tools">
+
+<section class="card" data-name="text دەق وشە پیت">
+<h2>📝 ژمێریاری دەق</h2>
+<textarea id="txt" rows="4" placeholder="دەقەکەت بنووسە..." oninput="count()"></textarea>
+<div class="result" id="countResult">پیت: 0 | وشە: 0</div>
+<button onclick="copy('txt')">کۆپی دەق</button>
+</section>
+
+<section class="card" data-name="age تەمەن">
+<h2>🎂 ژمێریاری تەمەن</h2>
+<label>بەرواری لەدایکبوون</label>
+<input type="date" id="birth">
+<button onclick="age()">ژمێریاری بکە</button>
+<div class="result" id="ageResult">ئەنجام لێرە دەردەکەوێت</div>
+</section>
+
+<section class="card" data-name="json formatter کۆد">
+<h2>💻 ڕێکخەری JSON</h2>
+<textarea id="json" rows="4" placeholder='{"name":"Snow"}'></textarea>
+<button onclick="formatJSON()">ڕێکخستنی JSON</button>
+<div class="result" id="jsonResult">ئەنجام لێرە دەردەکەوێت</div>
+</section>
+
+<section class="card" data-name="password وشەی نهێنی">
+<h2>🔐 دروستکەری وشەی نهێنی</h2>
+<label>درێژی وشەی نهێنی</label>
+<input type="number" id="len" value="16" min="8" max="64">
+<button onclick="password()">دروستکردن</button>
+<div class="result" id="passResult">وشەی نهێنی بەهێز</div>
+<button onclick="copy('passResult')">کۆپی</button>
+</section>
+
+<section class="card" data-name="qr code">
+<h2>▦ دروستکەری QR Code</h2>
+<input id="qrText" placeholder="دەق یان لینک بنووسە">
+<button onclick="makeQR()">دروستکردنی QR</button>
+<div class="result" id="qrResult">بۆ دروستکردنی QR ئینتەرنێت پێویستە.</div>
+</section>
+
+<section class="card" data-name="website وێبسایت لینک">
+<h2>🌐 کردنەوەی وێبسایت</h2>
+<input id="url" placeholder="example.com">
+<button onclick="openWebsite()">کردنەوەی لینک</button>
+<div class="result" id="urlResult">لینکەکەت بنووسە.</div>
+</section>
+
+</div>
+</main>
+<footer>❄️ Snow Tools — دروستکراوە بە 💙 بۆ کوردستان</footer>
+<script>
+function count(){
+let t=document.getElementById('txt').value;
+let words=t.trim()?t.trim().split(/\s+/u).length:0;
+document.getElementById('countResult').textContent='پیت: '+t.length+' | وشە: '+words;
+}
+async function copy(id){
+let e=document.getElementById(id);
+let t=e.value!==undefined?e.value:e.textContent;
+try{await navigator.clipboard.writeText(t);alert('کۆپی کرا ✓')}
+catch(err){alert('دەقەکە هەڵبژێرە و کۆپی بکە')}
+}
+function age(){
+let v=document.getElementById('birth').value;
+let r=document.getElementById('ageResult');
+if(!v){r.textContent='بەرواری لەدایکبوون هەڵبژێرە';return}
+let b=new Date(v+'T00:00:00'),n=new Date();
+if(b>n){r.textContent='بەروارەکە دروست نییە';return}
+let y=n.getFullYear()-b.getFullYear();
+let m=n.getMonth()-b.getMonth();
+let d=n.getDate()-b.getDate();
+if(d<0){m--;d+=new Date(n.getFullYear(),n.getMonth(),0).getDate()}
+if(m<0){y--;m+=12}
+r.textContent=y+' ساڵ، '+m+' مانگ، '+d+' ڕۆژ';
+}
+function formatJSON(){
+try{document.getElementById('jsonResult').textContent=JSON.stringify(JSON.parse(document.getElementById('json').value),null,2)}
+catch(e){document.getElementById('jsonResult').textContent='JSON هەڵەیە؛ تکایە پشکنینی بکە.'}
+}
+function password(){
+let n=Math.max(8,Math.min(64,Number(document.getElementById('len').value)||16));
+let chars='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*';
+let a=new Uint32Array(n);crypto.getRandomValues(a);
+let s='';for(let x of a)s+=chars[x%chars.length];
+document.getElementById('passResult').textContent=s;
+}
+function makeQR(){
+let t=document.getElementById('qrText').value.trim();
+if(!t){document.getElementById('qrResult').textContent='سەرەتا دەق یان لینک بنووسە';return}
+let u='https://api.qrserver.com/v1/create-qr-code/?size=220x220&data='+encodeURIComponent(t);
+document.getElementById('qrResult').innerHTML='<img alt="QR Code" style="max-width:100%;background:white;padding:8px;border-radius:8px" src="'+u+'"><br><a style="color:#7de0ff" href="'+u+'" download="snow-qr.png">کردنەوە و داگرتنی QR</a>';
+}
+function openWebsite(){
+let v=document.getElementById('url').value.trim();
+if(!v){document.getElementById('urlResult').textContent='لینک بنووسە';return}
+if(!/^https?:\/\//i.test(v))v='https://'+v;
+try{let u=new URL(v);if(!['http:','https:'].includes(u.protocol))throw 0;window.open(u.href,'_blank','noopener,noreferrer');document.getElementById('urlResult').textContent='داواکاری کردنەوە نێردرا'}
+catch(e){document.getElementById('urlResult').textContent='لینکەکە دروست نییە'}
+}
+function filterTools(){
+let q=document.getElementById('search').value.toLowerCase();
+document.querySelectorAll('.card').forEach(c=>c.style.display=(c.innerText+' '+c.dataset.name).toLowerCase().includes(q)?'block':'none');
+}
+const cv=document.getElementById('snow'),cx=cv.getContext('2d');let fs=[];
+function resize(){cv.width=innerWidth;cv.height=innerHeight;fs=Array.from({length:65},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*2+1,s:Math.random()+.4}))}
+function draw(){cx.clearRect(0,0,cv.width,cv.height);cx.fillStyle='#80dfff';for(let f of fs){cx.globalAlpha=.65;cx.beginPath();cx.arc(f.x,f.y,f.r,0,7);cx.fill();f.y+=f.s;if(f.y>innerHeight){f.y=0;f.x=Math.random()*innerWidth}}requestAnimationFrame(draw)}
+onresize=resize;resize();draw();
+</script>
+</body>
+</html>
